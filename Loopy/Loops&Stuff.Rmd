@@ -1,0 +1,412 @@
+---
+title: "Nested For-Loops and Alternatives for R"
+author: "Chris Mellinger"
+date: "October 17^th^, 2017"
+output:
+  html_document: default
+  html_notebook: default
+---
+
+# Single For-Loops
+
+## The Syntax
+
+Loops are just a way of telling a computer to repeat a task a bunch of times. I'll focus on for-loops here because they seem to be useful more often for me than other kinds, but in general they all do the same thing. If I have a task to do, like add the number 1 to the set of numbers 55 to 98, I need to tell the computer:
+
+*For each item in the set 55 to 98, add 1, then store the result.*
+
+Let me translate each piece to R code:
+
+*... in the set 55 to 98 ...*
+```{r, eval=F}
+setOfNumbers <- 55:98
+```
+
+*... add 1 ...*
+```{r, eval=F}
+newNumber <- oldNumber + 1
+```
+
+*... store the result.*
+```{r, eval=F}
+resultVector[currentItem] <- newNumber
+```
+
+The only thing left is to translate the *For each item...* part. Programming languges have different ways to specify this, but R's is:
+
+```{r, eval=F}
+for (currentItem in setOfNumbers) {
+  # do the thing.
+}
+```
+
+Putting it all together:
+
+```{r}
+setOfNumbers <- 55:98
+resultVector <- vector(mode="numeric", length=length(setOfNumbers))
+for (currentItem in 1:length(setOfNumbers)) {
+  oldNumber <- setOfNumbers[currentItem]
+  newNumber <- oldNumber + 1
+  resultVector[currentItem] <- newNumber
+}
+
+# look at the result
+print(resultVector)
+```
+
+Success!
+
+## The Intuition
+
+Let's look at precisely what this for-loop is doing. In all programming languages, for-loops will take some set of things to iterate through[^1]. This set will be a vector or a list. I'll refer to it as the **control vector**. The loop always starts with the first element of the control vector, does the code inside it, and then moves on to the next element of the control vector, and does the code inside it, and so on. In R, the control vector is always the object after the keyword `in`. In our example, the control vector is `1:length(setOfNumbers)`. This is shorthand in R that defines a vector going from 1 to (or `:` in code) the length of `setOfNumbers`, in this case 44:
+
+[^1]: In some languages, the iteration needs to be specified in addition to the set of things. For example, Javascript requires that the programmer provide a start value, a termination condition, and an iteration method. In R (and Python), the iteration is automatic.
+
+```{r}
+print(1:length(setOfNumbers))
+```
+
+The for-loop always assigns each value of the control vector to a **convenience variable** that can be referenced through the loop's code. I get to choose the name of this variable, and it always appears before the keyword `in`. In this case, I named it `currentItem`. You can see both the control vector and the convenience variable in this line:
+
+```{r, eval=F}
+for (currentItem in 1:length(setOfNumbers)) {
+```
+
+Let's step through, precisely as the loop will, and look at what happens. The loop starts with the first element of the control vector and assigns it to the convenience variable. So, in our case, the first element is 1, and the control variable is `currentItem`. In the first iteration, R does a `currentItem <- 1` internally. Every time that `currentItem` is referenced later, the number 1 will be substituted. Then the code runs, so it will look like this if I replace every instance of `currentItem` with the number it currently holds (1):
+
+```{r, eval=F}
+oldNumber <- setOfNumbers[1] # Here, currentItem got replaced with 1...
+newNumber <- oldNumber + 1
+resultVector[1] <- newNumber # ... and here.
+```
+
+So now we can easily see that we are grabbing the first element of `setOfNumbers` and storing it as a new variable `oldNumber`. Then, we do the addition operation. Finally, we assigned the result to the first element of `resultVector`, again by calling its index.
+
+Now we get to a critical piece of code:
+
+```{r, eval=F}
+}
+```
+
+This single character is responsible for telling R that we have finished working on the first iteration of the loop, and we are ready for the next one. This character sends R back to the line of code where we started the for loop. That is, it "jumps" from the last line here to the first one:
+
+```{r}
+for (currentItem in 1:length(setOfNumbers)) { # Jumps to here.
+  oldNumber <- setOfNumbers[currentItem]
+  newNumber <- oldNumber + 1
+  resultVector[currentItem] <- newNumber
+} # CLOSING BRACKET; this tells R to jump back to the beginning.
+```
+
+Then, the whole process begins again, but *assigning the next item of the control vector to the convenience variable!* We are on the second iteration, so we get the second item in `1:length(setOfNumbers)`, which also happens to be 2 in this case. Thus, `currentItem <- 2` is implicitly called by R. Then, the "internal" code is repeated. Here it is with the new value of `currentItem` substituted:
+
+```{r, eval=F}
+oldNumber <- setOfNumbers[2] # Here, currentItem got replaced with 1...
+newNumber <- oldNumber + 1
+resultVector[2] <- newNumber # ... and here.
+```
+
+Now we are looking at the *second* thing in `setOfNumbers`, again via the index, and assigning to the second spot in `resultVector`. When R reaches the `}` character, it knows to jump back to the beginning, reassign to the convience variable from the control vector, and so on.
+
+When R runs out of things in the control vector, it knows the loop is finished. On the last run, the `}` character no longer makes R jump backwards. Instead, because there is nothing else to iterate, it will move on to whatever happens next in the code. No more looping for now!
+
+## Further Examples
+
+### Not referencing the convenience variable
+
+I can use for loops to do something a certain number of times without ever needing the convenience variable. For example, I could have it choose 100 random numbers in a for-loop:
+
+```{r, eval=F}
+for (i in 1:100) {
+  rnorm(1)
+}
+```
+
+I have named the convenience variable `i` here (so convenient that I get to choose the name, right?). The convenience variable is not used in the internal code in this case.
+
+Savy R users will know that I do not need to call this for loop to generate many random numbers. In fact, it is probably faster to use the built in functionality:
+
+```{r, eval=F}
+rnorm(100)
+```
+
+But guess what R is doing internally with that argument? You guessed it: it is using a for-loop to run the code that generates a single random number 100 times. 
+
+**Nota bene**
+
+Note that you will see the variable `i` often used as a name for the convenience variable across many languages. This is generally fine, but note that one-character variable names are generally discouraged. For example, you would never name a variable `c` in R because one of R's most basic functions is named that: `c()`. R is usually smart enough to figure out the difference, but why tempt fate when you can use a more descriptive name, like `column`, `color`, or `catCutenessRating`?
+
+### Iterating through things that are not numbers
+
+In R, the control vector can actually be a list, and so you can iterate through anything a list can hold (which is pretty much any R object). It gets assigned to the convenience variable, and then code on it is repeated just like before. For instance, I might want to take a list of strings and add a prefix to each one:
+
+```{r}
+listOfWords <- c(' Smith', ' the Rock Johnson (sp?)', "'s World (wrong, I know)")
+
+for (word in listOfWords) {
+  print(paste0('Dwayne', word))
+}
+```
+
+Again, it probably faster to just use R's built in call to a for loop:
+
+```{r}
+paste0('Dwayne', listOfWords)
+```
+
+But now you see how it works on the inside.
+
+## The Alternatives in R
+
+Now, of course this task is extremely trivial and there are way more "code efficient" ways to do it in R. For instance:
+
+```{r}
+(resultVector <- 55:98 + 1)
+```
+
+But, the thing to emphasize is that under the hood R is doing exactly what I wrote out above. That is, it is taking each element of the vector `55:98` and performing the operation `+ 1` on it, then adding it to a vector which returns the result, like `resultVector`. The R programmers have provided us with a syntactic way of writing a for-loop that doesn't require so much typing.
+
+Here's another way that R tries to simplify things like this:
+```{r}
+(resultVector <- sapply(X=55:98, FUN=function (number) {number + 1}))
+```
+
+Same result. Notice how sapply tries to help us out. Instead of typing the entire `for (currentItem in 1:length(setOfNumbers))`, it just asks us for `X`. It then expands on that language for us. And instead of including the three lines of code to separately access the current number, add 1 to it, and then store the result in a vector, it just asks us for the crux of the operation: `number + 1`. It takes care of the details of accessing the item and saving the result for us.
+
+The point of the two alternative methods is show that if you are using common R functions and operations, you are already using for-loops and have a pretty good intuition for how they work. The rest is a matter of seeing enough examples to use them effectively.
+
+## Other Kinds of Loops
+
+There are other kinds of loops, notable the `while` loop. It does the same basic thing, but with an even more basic way of doing it: repeat code until some condition is met. For example, I might want to add numbers up until I reach a certain threshold. In pseudo-code:
+
+```
+1 start at 0
+2 add 1
+3 check to see if I exceeded 10
+4 if no, go back to line 2
+5 if yes, stop looping
+```
+
+In R code, we do it like this:
+
+```{r}
+i <- 0
+while(i <= 10) {
+  print(i <- i + 1)
+}
+```
+
+Notice that I have to instantiate a value to begin with in that example. Then, I tell the while loop what condition it needs to check after every iteration of its inner code. When that condition evaluates to `TRUE`, R will stop running the while loop and move on in the program.
+
+While loops are extremely powerful, especially when you don't know exactly how long it will take to finish the task. For instance, I might want a simulator that flips two coins, and stops only when they are both heads. I'll think of heads as equal to 1, and tails as equal to 0 in both cases. I also want to count the number of iterations I need to run until the stopping condition. Here is the code:
+
+```{r}
+i <- 0
+bothHeads <- FALSE
+while (!bothHeads) {
+  coin1 <- rbinom(1, 1, .5)
+  coin2 <- rbinom(1, 1, .5)
+  i <- i + 1
+  if (coin1 == 1 && coin2 == 1) {
+    bothHeads <- TRUE
+  }
+}
+
+print(i)
+```
+
+In this example, I never know how long it will take to acheive the result I need. It might take 1 iteration, or it might thereotically take 1000 (though that is unlikely). It would be very tricky to construct a for-loop for that problem since the number of iterations varies wildly.
+
+This document is really about for-loops, so I mention while-loops for completeness and will stop there. But I will say this: make sure your condition eventually evaluates to `TRUE`! If it remains `FALSE` forever, your while-loop will continue repeating its inner code forever.
+
+# Nesting Loops
+
+What if we needed to add a number to each element of an array? Arrays are organized in R as a set of rows with columns (or columns with rows). So, now we have two dimensions of things to specify to access any given number. If I have a matrix:
+
+```{r}
+myMat <- matrix(
+  data = c(5,1,601,395,29,3,5,2,521,8,3,7),
+  nrow=3
+)
+print(myMat)
+```
+
+If I need to access the second element of the third row, I need to write:
+
+```{r}
+(myMat[3,2])
+```
+
+So, I need a way to pass every row number and every column number to my access operation. In fact, I probably want to store the result as a matrix too, so I need to tell my new matrix where to store the new result as a row and column number also. The adding operation hasn't changed; it is still `newNumber <- oldNumber + 1`. Here's how to do it in a "nested" for-loop structure:
+
+```{r}
+# Here's my data again:
+myMat <- matrix(
+  data = c(5,1,601,395,29,3,5,2,521,8,3,7),
+  nrow=3
+)
+
+resultMat <- matrix(nrow=3, ncol=4) # result matrix to store the new data
+
+# Notice that I can count the number of rows with nrow(), and columns with
+# ncol(). Then, I tell R to do it for each of them with the shortcut language
+# 1:nrow() and 1:ncol().
+for (currentRow in 1:nrow(myMat)) { 
+  for (currentCol in 1:ncol(myMat)) {
+    oldNumber <- myMat[currentRow, currentCol]
+    newNumber <- oldNumber + 1
+    resultMat[currentRow, currentCol] <- newNumber
+  }
+}
+
+# look at the result
+print(resultMat)
+```
+
+# Intuition for Nested Loops
+
+Let's develop an intuition for what is happening in just the looping portion of the code:
+
+```{r, eval=F}
+for (currentRow in 1:nrow(myMat)) { 
+  for (currentCol in 1:ncol(myMat)) {
+    oldNumber <- myMat[currentRow, currentCol]
+    newNumber <- oldNumber + 1
+    resultMat[currentRow, currentCol] <- newNumber
+  }
+}
+```
+
+The statement `1:nrow(myMat)` yields a vector: `r 1:nrow(myMat)`. This is the control vector for the "outer" loop. So does the code `1:ncol(myMat)`: `r 1:ncol(myMat)`. This is the control vector for the "inner" loop. The for loop then has something like:
+
+```
+for (currentRow in [1,2,3]) {
+```
+
+It takes each item in `[1,2,3]` and assigns it to the convenience variable, `currentRow` (that, conveniently, I named). I can now use this variable to do anything I want to do inside the for loop. So let's jump into the loop at the beginning. The for-loop automatically assigns the first element of the vector `[1,2,3]` to the variable `currentRow`. Thus, `currentRow` is holding the value 1.
+
+The next line of code is another `for` statement, and it also assigns the first value of its vector to the variable `currentCol`. Thus, `currentCol` is now equal to 1. When I use these variables later, they contain those values. The body of the loop now runs:
+
+```
+oldNumber <- myMat[currentRow, currentCol]
+newNumber <- oldNumber + 1
+resultMat[currentRow, currentCol] <- newNumber
+```
+
+Every time R sees `currentRow` it substitues 1, and same for `currentCol`. So I could expand the code to say:
+
+```
+oldNumber <- myMat[1, 1]
+newNumber <- oldNumber + 1
+resultMat[1, 1] <- newNumber
+```
+
+Now, the critical piece of flow: when we reach the closing `}`, we go back to the for loop with the matching `{`. I'm adding comments in the next part to show where these are for our inner for loop:
+
+```{r, eval=F}
+for (currentRow in 1:nrow(myMat)) { 
+  for (currentCol in 1:ncol(myMat)) { # OPENING BRACKET!!!
+    oldNumber <- myMat[currentRow, currentCol]
+    newNumber <- oldNumber + 1
+    resultMat[currentRow, currentCol] <- newNumber
+  } # CLOSING BRACKET!!! When we get to here, we go back to the opening bracket
+}
+```
+
+So we `do the thing`, in this case accessing a number, adding one, and storing the result (but this could be literally any programming task), and then revert to the line `for (currentCol in 1:ncol(myMat)) {`. It is really important to see here that we are still inside the "inner" for-loop. We haven't yet reached the closing bracket for the "outer" one, so we do not worry about it yet.
+
+What happens next? The inner for-loop syntax now advances to the next thing in its vector, and re-assigns that new value to our convenience variable, `currentRow`. Our `1:nrow(myMat)` vector is `[1,2,3]`, so the second value is 2. `currentRow is now equal to 2. The for-loop now repeats its code, but with this new value:
+
+```
+oldNumber <- myMat[2, 1]
+newNumber <- oldNumber + 1
+resultMat[2, 1] <- newNumber
+```
+
+Remember, `currentCol` is still the same. So, we have advanced one row, repeated code, and now we end up at our closing bracket again. We go back to the opening bracket for that for loop, and repeat, assigning the third number in `1:nrow(myMat)` = `[1,2,3]`, which is 3, to `currentRow`.
+
+```
+oldNumber <- myMat[3, 1]
+newNumber <- oldNumber + 1
+resultMat[3, 1] <- newNumber
+```
+
+Now we are out of stuff in the vector! We've used every element of `[1,2,3]`. The "inner" for-loop is now finished. So, when we get to the closing bracket, we keep going in the code, instead of reverting back to the opening bracket. That means:
+
+```{r}
+for (currentRow in 1:nrow(myMat)) { 
+  for (currentCol in 1:ncol(myMat)) { 
+    oldNumber <- myMat[currentRow, currentCol]
+    newNumber <- oldNumber + 1
+    resultMat[currentRow, currentCol] <- newNumber
+  } # When we are finished, we keep going to the next line, finally...
+} #... which is this one. Another closing bracket!!!
+```
+
+Notice that the new closing bracket we are at is the one that matches the "outer" loop's opening bracket. So, we go to the beginning of the outer for-loop, and it does the thing all loops do: advance to the next value in its control vector, and repeat the code inside it. In this case, the convenience variable is now `currentCol`, so we are going to take the next column value and do everything over again. `currentCol` now takes the value of 2, and we go to the next line.
+
+The next line is our old friend the "inner" loop. Since R is evaluating the code naively, it thinks we haven't seen this before. So, it is going to start over. Assign the first value of the inner loop vector to its convenience variable, `currentRow`, and repeat the code inside of the loop. Our code inside now looks like this to R:
+
+```
+oldNumber <- myMat[1, 2] # because currentCol is 2, and currentRow is 1
+newNumber <- oldNumber + 1
+resultMat[1, 2] <- newNumber
+```
+
+In this case, we will end up going "down the columns" of our matrix. Start with column 1, take each row in it starting with row 1, add 1, store the result, then move on to column 2. The entire flow will be:
+
+```
+column1row1 then column1row2 then column1row3 then
+column2row1 then column2row2 then column2row3 then
+all the rest....
+```
+
+# Chad's Situation
+
+Here is an example inspired by a recent conversation I had with Chad.
+
+Chad has data that is stored seperately for each participant: one csv file for each person. Each csv file has a variable number of columns representing epochs for that participant. Each column has a variable number of items representing points for each person. Thus, there are three levels at which we have to have access, so we will have three nested loops. Here's some suedo code with suggested functions that you can look up if need be.
+
+```{r, eval=F}
+allTheFiles <- list.files(path="path/to/your/files")
+
+for (flNum in 1:length(allTheFiles)) { # I could loop through each file, but 
+  # in this case I want the number to use for a variable name later.
+  fl <- allTheFiles[flNum]
+  df <- read.csv(fl) # depending on how much of a mess the csvs are, you might
+  # need more control with something like read.table(), which allows you to use
+  # the argument `skip` to ignore stuff at the beginning.
+  for (colNum in 1:ncol(df)) {
+    curCol <- na.omit(df[,colNum]) # get rid of empty values with na.omit() so 
+    # we're not wasting time
+    for (rowNum in 1:length(curCol)) {
+      dataPt <- curCol[rowNum]
+      DoThingsWithTheDataPoint()
+      # maybe construct a variable name for a wide format dataframe:
+      varName <- paste(fl, colNum, rowNum, sep="_")
+      # add the value to a new dataframe in wide:
+      wdDf[flNum, varName] <- dataPt # flNum is now the row, and varName is now the column
+      MaybeStoreItSomewhereNew()
+    }
+  }
+}
+```
+
+Hopefully now you see how much awesome control the syntax like this gives you. You get to do anything you want at any point in the access process, like count the columns in a file before you deal with individual points, or just open the file in an efficient way.
+
+The problem with R is that it adds a bit of overhead to use the `for() {}` syntax. This is really unfortunate, and not nearly as much of an issue in something like python. Instead, we are supposed to use "functionals," or some of those shortcuts that I mentioned earlier. This makes the code a little less readable in some of these cases, but may save time if you have a lot of data. Here's an approach I might use to translate the above code into functionals.
+
+```{r, eval=F}
+allTheFiles <- list.files(path="path/to/your/files")
+
+# If it won't take up too much memory, we can actually load everything ahead of time:
+dfList <- lapply(allTheFiles, function (fl) {read.csv(fl)})
+
+# We can also get information we need about each one ahead of time:
+dfColCounts <- sapply(dfList, ncol)
+
+# Now we can use a functional to operate on each one:
+
+```
+

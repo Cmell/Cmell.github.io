@@ -5,6 +5,8 @@ date: "8/8/2018"
 output: html_document
 ---
 
+#Example 1: Same slope, same errors, different intercept
+
 This example shows that the average of two correlation coefficients calculated from different sets of data do not equal the correlation observed if the two sets of data are treated as a single set. I constructed two models with exactly the same correlation coefficient by simulating data with the exact same error terms (and x values for simplicity). The average of those two equal numbers is, obviously, exactly equal to the value of either. However, the intercepts that each model was generated with are very different. As a result, the correlation between the variables comprising the full dataset is much lower.
 
 ```{r}
@@ -56,3 +58,117 @@ abline(lm(yZ2 ~ xZ2), col = 'blue')
 abline(lm(yZAll ~ xZAll), col = 'forestgreen')
 ```
 
+# Example 2: Different slopes, same errors, same intercept
+
+```{r}
+y1 <- .9 * x1 + errs
+y2 <- .2 * x2 + errs
+
+xAll <- c(x1, x2); yAll <- c(y1, y2)
+
+print(c1 <- cor(x1, y1))
+print(c2 <- cor(x2, y2))
+print(avc <- mean(c(c1, c2)))
+print(cor(xAll, yAll))
+```
+
+Plots
+
+```{r}
+plot(xAll, yAll, type = 'n')
+points(x1, y1, col = 'red'); points(x2, y2, col = 'blue')
+abline(lm(y1 ~ x1), col = 'red')
+abline(lm(y2 ~ x2), col = 'blue')
+
+summary(lm(y1 ~ x1))
+summary(lm(y2 ~ x2))
+
+avgMod <- lm(yAll ~ xAll)
+summary(avgMod)
+abline(avgMod, col = 'forestgreen')
+```
+
+# Example 3: Randomly sample a subset of a population
+
+The previous two examples seem like relatively rare situations. Generating two different data sets from the same error set but around two different lines basically dooms this strategy from the outset. What about a more realistic situation where we randomly sample from a population with a single underlying correlation?
+
+```{r}
+xAll <- runif(n)
+yAll <- .6 * xAll + rnorm(n)
+
+cor(xAll, yAll)
+summary(mod <- lm(yAll ~ xAll))
+plot(xAll, yAll)
+abline(mod)
+```
+
+Now, choose two non-overlapping subsets.
+
+```{r}
+nSmall <- n / 2
+sampleIndices <- sample(1:length(xAll), nSmall * 2)
+set1Indices <- sampleIndices[1:(length(sampleIndices) / 2)]
+set2Indices <- sampleIndices[(length(sampleIndices) / 2 + 1):length(sampleIndices)]
+
+x1 <- xAll[set1Indices]; x2 <- xAll[set2Indices]
+y1 <- yAll[set1Indices]; y2 <- yAll[set2Indices]
+
+print(c1 <- cor(x1, y1))
+print(c2 <- cor(x2, y2))
+print(mean(c(c1, c2)))
+print(cor(xAll, yAll))
+```
+
+Now we are a lot closer! Let's plot.
+
+```{r}
+plot(xAll, yAll, type = 'n')
+points(x1, y1, col = 'red'); points(x2, y2, col = 'blue')
+abline(lm(y1 ~ x1), col = 'red')
+abline(lm(y2 ~ x2), col = 'blue')
+
+summary(lm(y1 ~ x1))
+summary(lm(y2 ~ x2))
+
+avgMod <- lm(yAll ~ xAll)
+summary(avgMod)
+abline(avgMod, col = 'forestgreen')
+```
+
+## Example 3 addendum: Different sized subsets
+
+```{r}
+nSmall1 <- floor(n / 5)
+nSmall2 <- n - nSmall
+sampleIndices <- sample(1:length(xAll), n)
+set1Indices <- sampleIndices[1:nSmall1]
+set2Indices <- sampleIndices[nSmall2:length(sampleIndices)]
+
+x1 <- xAll[set1Indices]; x2 <- xAll[set2Indices]
+y1 <- yAll[set1Indices]; y2 <- yAll[set2Indices]
+
+print(c1 <- cor(x1, y1))
+print(c2 <- cor(x2, y2))
+print(mean(c(c1, c2)))
+print(cor(xAll, yAll))
+```
+
+That messes things up a bit.
+
+```{r}
+plot(xAll, yAll, type = 'n')
+points(x1, y1, col = 'red'); points(x2, y2, col = 'blue')
+abline(lm(y1 ~ x1), col = 'red')
+abline(lm(y2 ~ x2), col = 'blue')
+
+summary(lm(y1 ~ x1))
+summary(lm(y2 ~ x2))
+
+avgMod <- lm(yAll ~ xAll)
+summary(avgMod)
+abline(avgMod, col = 'forestgreen')
+```
+
+# Conclusion
+
+In general, correlation coefficients cannot be averaged. The answer will be close if the two sets are randomly selected from a population with a common correlation and the sets are similar sizes. However, if the subsets are systematically different in any way in the underlying model, or if they are different sizes, the averaged correlation will be a very biased estimate. In practice, this is probably not a good idea.

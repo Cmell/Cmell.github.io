@@ -5,7 +5,7 @@ date: "8/8/2018"
 output: html_document
 ---
 
-#Example 1: Same slope, same errors, different intercept
+# Example 1: Same slope, same errors, different intercept
 
 This example shows that the average of two correlation coefficients calculated from different sets of data do not equal the correlation observed if the two sets of data are treated as a single set. I constructed two models with exactly the same correlation coefficient by simulating data with the exact same error terms (and x values for simplicity). The average of those two equal numbers is, obviously, exactly equal to the value of either. However, the intercepts that each model was generated with are very different. As a result, the correlation between the variables comprising the full dataset is much lower.
 

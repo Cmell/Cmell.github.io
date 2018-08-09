@@ -1,0 +1,58 @@
+---
+title: "Correlation Averages"
+author: "Chris Mellinger"
+date: "8/8/2018"
+output: html_document
+---
+
+This example shows that the average of two correlation coefficients calculated from different sets of data do not equal the correlation observed if the two sets of data are treated as a single set. I constructed two models with exactly the same correlation coefficient by simulating data with the exact same error terms (and x values for simplicity). The average of those two equal numbers is, obviously, exactly equal to the value of either. However, the intercepts that each model was generated with are very different. As a result, the correlation between the variables comprising the full dataset is much lower.
+
+```{r}
+n <- 200
+
+x1 <- seq(0, 10, length.out = n/2)
+x2 <- seq(0, 10, length.out = n/2)
+
+errs <- rnorm(n/2, sd = 1)
+
+y1 <- 10 + 1 * x1 + errs
+y2 <- -10 + 1 * x2 + errs
+
+xAll <- c(x1, x2); yAll <- c(y1, y2)
+
+print(c1 <- cor(x1, y1))
+print(c2 <- cor(x2, y2))
+print(avgc <- mean(c(c1, c2)))
+print(cor(xAll, yAll))
+```
+
+Why? Because a correlation coefficient captures an effect size, not just a slope in the original metric of the data. The sums of squares for the best-fit line of the whole data set are obviously much larger than the sums of squares for either subset of the data. It is easy to see when all of them are plotted. The predictions for each subset (blue and red lines) are much closer to the points than the prediction for the whole set (green line).
+
+```{r}
+plot(xAll, yAll, type = 'n')
+points(x1, y1, col = 'red'); points(x2, y2, col = 'blue')
+abline(lm(y1 ~ x1), col = 'red')
+abline(lm(y2 ~ x2), col = 'blue')
+
+summary(lm(y1 ~ x1))
+summary(lm(y2 ~ x2))
+
+avgMod <- lm(yAll ~ xAll)
+summary(avgMod)
+abline(avgMod, col = 'forestgreen')
+```
+
+Of course, if the variables are standardized and plotted, things look different. The red crosses and blue points (each subset) are now exactly on top of one another since I generated them using the same exact error terms. The standardized full set is now split in two, and the best-fit line has a lower slope than the subsets. This slope is reflected by the lower correlation coefficient.
+
+```{r}
+xZ1 <- scale(x1); xZ2 <- scale(x2); yZ1 <- scale(y1); yZ2 <- scale(y2)
+xZAll <- scale(xAll); yZAll <- scale(yAll)
+
+plot(c(xZ1, xZ2, xZAll), c(yZ1, yZ2, yZAll), type = 'n')
+points(xZ1, yZ1, col = 'red', pch = 3); points(xZ2, yZ2, col = 'blue')
+points(xZAll, yZAll, col = 'forestgreen')
+abline(lm(yZ1 ~ xZ1), col = 'red')
+abline(lm(yZ2 ~ xZ2), col = 'blue')
+abline(lm(yZAll ~ xZAll), col = 'forestgreen')
+```
+

@@ -428,7 +428,7 @@ $(document).ready(function () {
 <p>Now we can construct the model. Here are the equations that represent this model, where <span class="math inline">\(j\)</span> stands for each measurement within person (here, each level of <span class="math inline">\(B\)</span>) and <span class="math inline">\(i\)</span> stands for each person in the sample.</p>
 <p><strong>Link function</strong></p>
 <p>First, we need a way of taking our observed decisions and modeling them continuously (I’m skipping basically all the math details of logistic regression here because I don’t think that is the question). Here’s the logit function for completeness:</p>
-<p><span class="math display">\[\eta_{ij} = log(\frac{P(guilty)_{ij}}{1-P(guilty)_{ij}}\]</span></p>
+<p><span class="math display">\[\eta_{ij} = log\left(\frac{P(guilty)_{ij}}{1-P(guilty)_{ij}}\right)\]</span></p>
 <p><strong>Level 1:</strong></p>
 <p><span class="math display">\[\eta_{ij} = \beta_0 + \beta_{1i} * BC1_{ij} + \beta_{2i} * BC2_{ij} + \beta_{3i} * BC3_{ij} + \beta_{4i} * BC4_{ij}\]</span></p>
 <p>There is no error term in this equation because we are talking about logistic regression.</p>

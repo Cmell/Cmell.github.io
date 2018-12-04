@@ -84,7 +84,7 @@ Now we can construct the model. Here are the equations that represent this model
 
 First, we need a way of taking our observed decisions and modeling them continuously (I'm skipping basically all the math details of logistic regression here because I don't think that is the question). Here's the logit function for completeness:
 
-$$\eta_{ij} = log(\frac{P(guilty)_{ij}}{1-P(guilty)_{ij}}$$
+$$\eta_{ij} = log\left(\frac{P(guilty)_{ij}}{1-P(guilty)_{ij}}\right)$$
 
 **Level 1:**
 

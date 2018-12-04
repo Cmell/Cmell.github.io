@@ -1,0 +1,41 @@
+---
+title: "MTurk Notes & Methods"
+author: "Chris Mellinger"
+date: "8/24/2018"
+output: html_document
+---
+
+# Introduction
+
+This document is intended to record my thoughts about best practices and tricks for using Amazon Mechanical Turk.
+
+# Best Practices
+
+## Hosting Tasks
+
+Once a task is completed, move it off the server. Lesson learned the hard way: tasks with URLs that differ by only a character or two can easily be confused. When participants go the wrong place, things are a pain. This danger is mitigated by not having old versions of tasks still hosted on the world-accessible domain.
+
+## Instructions
+
+Always tell participants to put something in the code-box if they complete part of the task. If they don't submit the HIT at all, it is much more difficult to pay them (see [this section](#payingturkers) for how to pay turkers who don't submit the HIT). To verify that they actually did the task, you can examine the time they spent on the HIT, which is recorded by MTurk for every participant.
+
+# Paying Turkers Who Don't Submit a HIT {#payingturkers}
+
+If turkers do not put something in the code box and sumbit the HIT, it can be difficult to pay them. The best way is this:
+
+1. Create a qualification that can be used to restrict access to the HIT you will use to pay them (more on this below). I call mine "Owed by me."
+2. Assign that qualification to the worker by going to this address: https://requester.mturk.com/workers/INSERTWORKERIDHERE Substitute their ID for `INSERTWORKERIDHERE`. You can assign them the qualification from this page by clicking `Assign Qualification Type`. It does not matter what value you assign to the qualification. I typically assign 0.
+3. Create a "Survey" project (NOT "Survey Link"). 
+    - In the **Describe your HIT to Workers** sections, put a title like "Pay worker *XXX*" with the worker ID in place of *XXX*. In the description, put something like: "This HIT is to pay worker *XXX*. Only submissions from that worker will be accepted."
+    - In the **Setting up your HIT** properties, set the payment at whatever you need to pay the worker. Make sure the `Number of assignments per HIT` is set to 1. The other parameters are usually fine as defaults.
+    - In the **Worker requirements** settings, do NOT require that workers be masters. Click "(+) Add another criterion" and select the qualification that you created in step 1. It is usually at the very bottom of the list. Change "equal to" to "has been granted."
+4. In the design and layout tab, add a single question: "Are you worker Axxxxxxx?" Participants should be able to click yes or no to this question, though their answer will not matter.
+5. Preview the HIT to ensure you made it as you inteded to.
+6. Publish the batch, ensuring that only one HIT is created.
+7. Email the participant telling them to search for the HIT and complete it. You can pay them by approving their submission.
+8. After they are paid, make sure to remove their qualification so you can use that type in similar situations in the future.
+
+Note that there are automated ways to accomplish this via the Amazon Web Services API if you have an AWS account. https://github.com/cloudyr/MTurkR/wiki/Paying-Workers-for-Unsubmitted-HITs
+
+
+

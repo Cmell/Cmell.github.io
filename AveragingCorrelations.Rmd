@@ -100,13 +100,13 @@ abline(avgMod, col = 'forestgreen')
 The previous two examples seem like relatively rare situations. Generating two different data setsaround two different lines basically dooms this strategy from the outset. What about a more realistic situation where we randomly sample from a population with a single underlying correlation?
 
 ```{r}
-xAll <- runif(n)
+xAll <- runif(n * 100)
 yAll <- .6 * xAll + rnorm(n)
 
 cor(xAll, yAll)
 mod <- lm(yAll ~ xAll)
 plot(xAll, yAll)
-abline(mod)
+abline(mod, col = 'red')
 ```
 
 Now, choose two non-overlapping subsets of equal size.
@@ -172,6 +172,29 @@ summary(lm(y2 ~ x2))
 
 avgMod <- lm(yAll ~ xAll)
 abline(avgMod, col = 'forestgreen')
+```
+
+# $$cov(X,Y) = (cov(X,Y1) + cov(X,Y2)) / 2$$ where $$Y = (Y1 + Y2) / 2$$
+
+```{r}
+x <- runif(n, 0, 3)
+y1 <- .8 * x + rnorm(n)
+y2 <- .8 * x + rnorm(n)
+
+y <- (y1 + y2) / 2
+print(c1 <- cor(x, y1))
+print(c2 <- cor(x, y2))
+print(c <- cor(x, y))
+print(mean(c(c1,c2)))
+```
+
+```{r}
+plot(c(x,x,x), c(y,y1,y2), type = 'n')
+points(x, y1, col = 'red'); points(x, y2, col = 'blue')
+points(x, y, col = 'forestgreen')
+abline(lm(y1 ~ x), col = 'red')
+abline(lm(y2 ~ x), col = 'blue')
+abline(lm(y ~ x), col = 'forestgreen')
 ```
 
 # Conclusion

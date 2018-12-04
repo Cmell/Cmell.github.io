@@ -461,8 +461,7 @@ $(document).ready(function () {
     0  &amp; \quad \text{if } A \text{ is level 2} \\
   \end{cases}
 \]</span></p>
-<p>Then, simply estimate the model above, but use <span class="math inline">\(AL1\)</span> for testing the simple effect of linear time at level A1, and <span class="math inline">\(AL2\)</span> to test the simple effect at level A2. For each of these “re-runs,[^1]” simply interpret <span class="math inline">\(\gamma_{10}\)</span> and its significance as before.</p>
-<p>[^1] Mathematically, the model will still predict the means, and therefore this is not multiple testing with respect to <span class="math inline">\(BC1\)</span>.</p>
+<p>Then, simply estimate the model above, but use <span class="math inline">\(AL1\)</span> for testing the simple effect of linear time at level A1, and <span class="math inline">\(AL2\)</span> to test the simple effect at level A2. For each of these “re-runs,<a href="#fn1" class="footnote-ref" id="fnref1"><sup>1</sup></a>” simply interpret <span class="math inline">\(\gamma_{10}\)</span> and its significance as before.</p>
 </section>
 </section>
 <section id="sample-code" class="level1">
@@ -508,6 +507,12 @@ al1Mod &lt;- glmer( # glmer, not lmer, because we need logistic regression
 )
 summary(al1Mod)</code></pre>
 <p>And likewise for level 2 on A.</p>
+</section>
+<section class="footnotes">
+<hr />
+<ol>
+<li id="fn1"><p>Mathematically, the model will still predict the means, and therefore this is not multiple testing with respect to <span class="math inline">\(BC1\)</span>.<a href="#fnref1" class="footnote-back">↩</a></p></li>
+</ol>
 </section>
 
 

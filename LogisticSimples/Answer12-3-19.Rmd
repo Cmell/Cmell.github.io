@@ -136,7 +136,7 @@ The original question was about simple effects. This model allows a test of any 
 
 Then, simply estimate the model above, but use $AL1$ for testing the simple effect of linear time at level A1, and $AL2$ to test the simple effect at level A2. For each of these "re-runs,[^1]" simply interpret $\gamma_{10}$ and its significance as before.
 
-[^1] Mathematically, the model will still predict the means, and therefore this is not multiple testing with respect to $BC1$.
+[^1]: Mathematically, the model will still predict the means, and therefore this is not multiple testing with respect to $BC1$.
 
 # Sample Code
 

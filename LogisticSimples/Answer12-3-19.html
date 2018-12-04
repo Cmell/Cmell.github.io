@@ -330,7 +330,7 @@ $(document).ready(function () {
     .5  &amp; \quad \text{if } A \text{ is level 2} \\
   \end{cases}
 \]</span></p>
-<p>Depending on the desired interpretation of <span class="math inline">\(B\)</span>, orthogonal contrasts might not be quite right. But given my ignorance of that variable, I will specify a set of orthogonal polynomial contrast codes for it. These would be most useful if <span class="math inline">\(B\)</span> represented something like time. In particualr, the linear and quadratic codes are nice for that because they can be interpreted as the change from beginning to end and the curve of the measurements, respectively.</p>
+<p>Depending on the desired interpretation of <span class="math inline">\(B\)</span>, a variety of codes could be used. But given my ignorance of that variable, I will specify a set of orthogonal polynomial contrast codes for it. These would be most useful if <span class="math inline">\(B\)</span> represented something like time. In particualr, the linear code would represent growth (or shrinkage) from the beginning of the time-series to the end, and quadratic code would represent the curve of the measurements over time. In the examples below, I will use this coding scheme and focus on the linear trend. Here is a set of such codes:</p>
 <table>
 <thead>
 <tr class="header">
@@ -377,7 +377,7 @@ $(document).ready(function () {
 </tr>
 </tbody>
 </table>
-<p>Other orthogonal codes exist that might be more appropriate. For example, if you are really only interested in the difference between, say, levels 1 and 2, then Helmert codes might help more. In this case, the BC1 code would test the tendecy for levels 1 and 2 to differ:</p>
+<p>Other orthogonal codes exist that might be more appropriate. For example, if the question of interestis the difference between, say, levels 1 and 2, then Helmert codes might help more. In this case, the BC1 code would test the tendecy for levels 1 and 2 to differ:</p>
 <table>
 <thead>
 <tr class="header">
@@ -424,14 +424,14 @@ $(document).ready(function () {
 </tr>
 </tbody>
 </table>
-<p>For all examples below, I use the first set of polynomial codes. I also assume that B is a time factor and that the effect of interest is the linear trend. This is only because it is easier to talk about with some meaning imbued, but any (correctly specified orthogonal) code or interpretation could work.</p>
+<p>For all examples below, I use the first set of polynomial codes. I also assume that B is a time factor and that the effect of interest is the linear trend. This is only because it is easier to write about with some meaning imbued, but any (correctly specified orthogonal) code or interpretation could work. <a href="https://stats.idre.ucla.edu/spss/faq/coding-systems-for-categorical-variables-in-regression-analysis-2/">Here are a bunch of possible codes.</a></p>
 <p>Now we can construct the model. Here are the equations that represent this model, where <span class="math inline">\(j\)</span> stands for each measurement within person (here, each level of <span class="math inline">\(B\)</span>) and <span class="math inline">\(i\)</span> stands for each person in the sample.</p>
 <p><strong>Link function</strong></p>
-<p>First, we need a way of taking our observed decisions and modeling them continuously (I’m skipping basically all the math details of logistic regression here because I don’t think that is the question). Here’s the logit function:</p>
+<p>First, we need a way of taking our observed decisions and modeling them continuously (I’m skipping basically all the math details of logistic regression here because I don’t think that is the question). Here’s the logit function for completeness:</p>
 <p><span class="math display">\[\eta_{ij} = log(\frac{P(guilty)_{ij}}{1-P(guilty)_{ij}}\]</span></p>
 <p><strong>Level 1:</strong></p>
 <p><span class="math display">\[\eta_{ij} = \beta_0 + \beta_{1i} * BC1_{ij} + \beta_{2i} * BC2_{ij} + \beta_{3i} * BC3_{ij} + \beta_{4i} * BC4_{ij}\]</span></p>
-<p>Notice there is no error term in this equation because we are talking about logistic regression.</p>
+<p>There is no error term in this equation because we are talking about logistic regression.</p>
 <p><strong>Level 2:</strong></p>
 <p><span class="math display">\[\beta_0 = \gamma_{00} + \gamma_{01} * AC_i + u_{0i}\]</span> <span class="math display">\[\beta_1 = \gamma_{10} + \gamma_{11} * AC_i + u_{1i}\]</span> <span class="math display">\[\beta_2 = \gamma_{20} + \gamma_{21} * AC_i + u_{2i}\]</span> <span class="math display">\[\beta_3 = \gamma_{30} + \gamma_{31} * AC_i + u_{3i}\]</span> <span class="math display">\[\beta_4 = \gamma_{40} + \gamma_{41} * AC_i + u_{4i}\]</span></p>
 <p>This is equivalent to a logistic mixed model ANOVA.</p>
@@ -442,13 +442,13 @@ $(document).ready(function () {
 <section id="main-effects-and-the-interaction-on-average" class="level2">
 <h2>Main effects and the interaction on average</h2>
 <p>I am assuming the orthogonal polynomial codes here, but hopefully this explanation will allow interpretation of any set of properly-specified codes.</p>
-<p>This framework allows us to test focused 1 degree of freedom questions. For example, if <span class="math inline">\(B\)</span> were time of measurement, then the predictor for the <span class="math inline">\(BC1\)</span> code, <span class="math inline">\(\beta_{1i}\)</span> represents the predicted increase in logits for each unit of time that passes (assuming measurements were taken approximately the same amount of time apart, etc.). The estimate of <span class="math inline">\(\gamma_{10}\)</span> (that is, the intercept of the level 2 equation modeling ) represents the average of of the <span class="math inline">\(\beta_{1i}\)</span>s across the entire sample. Because we have used orthogonal contrast codes to represent <span class="math inline">\(A\)</span>, <span class="math inline">\(\gamma_{10}\)</span> is the main effect of the linear trend (the average linear trend across the levels of <span class="math inline">\(A\)</span>). If it is significant and positive, we conclude that people choose guilty more often over time on average. Equivalently, the odds of choosing guilty increases from the first measurement to the last on average. A negative estimate (that is significantly different from zero) would imply that people choose guilty less often over time on average.</p>
-<p>The interaction question is captured by the estimate of <span class="math inline">\(\gamma_{11}\)</span>. This is the predicted difference in <span class="math inline">\(\beta_{1i}\)</span> between the levels of <span class="math inline">\(A\)</span> (in logits). Because <span class="math inline">\(AC\)</span> is coded -.5 and +.5, the estimate of <span class="math inline">\(\gamma{11}\)</span> is exactly the logit difference. If significant and positive, then the linear time trend is larger for level A2 than for level A1. A significantly negative slope indicates the opposite pattern.</p>
+<p>This framework allows us to test focused 1 degree of freedom questions. For example, if <span class="math inline">\(B\)</span> were time of measurement, then the predictor for the <span class="math inline">\(BC1\)</span> code, <span class="math inline">\(\beta_{1i}\)</span> represents the predicted increase in logits for each unit of time that passes (assuming measurements were taken approximately the same amount of time apart, etc.). The estimate of <span class="math inline">\(\gamma_{10}\)</span> (that is, the intercept of the level 2 equation modeling the linear effect of time as the outcome) represents the average of of the <span class="math inline">\(\beta_{1i}\)</span>s across the entire sample. Because we have used orthogonal contrast codes to represent <span class="math inline">\(A\)</span>, <span class="math inline">\(\gamma_{10}\)</span> is the main effect of the linear trend (the average linear trend across the levels of <span class="math inline">\(A\)</span>). If it is significant and positive, we conclude that people choose guilty more often over time on average. Equivalently, the odds of choosing guilty increases from the first measurement to the last on average. A negative estimate (that is significantly different from zero) would imply that people choose guilty less often over time on average.</p>
+<p>The interaction question is captured by the estimate of <span class="math inline">\(\gamma_{11}\)</span>. This is the predicted difference in <span class="math inline">\(\beta_{1i}\)</span> between the levels of <span class="math inline">\(A\)</span> (in logits). Because <span class="math inline">\(AC\)</span> is coded -.5 and +.5, the estimate of <span class="math inline">\(\gamma{11}\)</span> is exactly the logit difference in the effect. If significant and positive, then the linear time trend is larger for level A2 than for level A1. A significantly negative slope indicates the opposite pattern.</p>
 </section>
 <section id="simple-effects-test" class="level2">
 <h2>Simple effects test</h2>
-<p>Note that a test of simple effects is, at best, exploratory unless you have a significant interaction! Obligatory caveat finished.</p>
-<p>Your original question was about simple effects. This model allows a test of any simple effect simply by changing the codes we use. I particular, you want to test the simple effects of <span class="math inline">\(B\)</span> at each level of <span class="math inline">\(A\)</span>. I will continue to reference <span class="math inline">\(BC1\)</span>, or the linear effect of “time,” as an example. This was capture by the <span class="math inline">\(\gamma_{10}\)</span> parameter, which is the intercept of the level 2 model with <span class="math inline">\(\beta_{1i}\)</span> as its outcome. Like any intercept, it can be interpreted as the predicted value of the outcome (the linear time effect here) <em>at the 0 point of the predictor!</em> The predictor here is <span class="math inline">\(AC\)</span>, and we can change its zero point by simpy recoding:</p>
+<p>Note that a test of simple effects is, at best, exploratory unless you have a significant interaction! Obligatory caveat.</p>
+<p>The original question was about simple effects. This model allows a test of any simple effect simply by changing the codes we use. I particular, we want to test the simple effects of <span class="math inline">\(B\)</span> at each level of <span class="math inline">\(A\)</span>. I will continue to reference <span class="math inline">\(BC1\)</span>, or the linear effect of “time,” as an example. This was capture by the <span class="math inline">\(\gamma_{10}\)</span> parameter, which is the intercept of the level 2 model with <span class="math inline">\(\beta_{1i}\)</span> as its outcome. Like any intercept, it can be interpreted as the predicted value of the outcome (the linear time effect here) <em>at the 0 point of the predictor!</em> The predictor here is <span class="math inline">\(AC\)</span>, and we can change its zero point by simpy recoding:</p>
 <p><span class="math display">\[ AL1 =
   \begin{cases}
     0  &amp; \quad \text{if } A \text{ is level 1} \\
@@ -462,7 +462,7 @@ $(document).ready(function () {
   \end{cases}
 \]</span></p>
 <p>Then, simply estimate the model above, but use <span class="math inline">\(AL1\)</span> for testing the simple effect of linear time at level A1, and <span class="math inline">\(AL2\)</span> to test the simple effect at level A2. For each of these “re-runs,[^1]” simply interpret <span class="math inline">\(\gamma_{10}\)</span> and its significance as before.</p>
-<p>[^1] Mathematically, the model will still predict the means, and therefore this is not multiple testing with respect to <span class="math inline">\(BC1\)</span></p>
+<p>[^1] Mathematically, the model will still predict the means, and therefore this is not multiple testing with respect to <span class="math inline">\(BC1\)</span>.</p>
 </section>
 </section>
 <section id="sample-code" class="level1">
